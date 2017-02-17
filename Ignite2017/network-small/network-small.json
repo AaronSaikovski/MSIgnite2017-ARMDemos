@@ -1,0 +1,207 @@
+﻿{
+  "$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
+  "contentVersion": "1.0.0.0",
+  "parameters": {
+    "vnetName": {
+      "type": "string",
+      "defaultValue": "VNET01",
+      "metadata": {
+        "description": "The name of the new Virtual Network to create. Do not include the Region location, this template will name the VNET based on the resource group location where is being deployed."
+      }
+    },
+    "vnetCIDR": {
+      "type": "string",
+      "defaultValue": "10.0.0.1/16",
+      "metadata": {
+        "description": "The IP Address Space for this new virtual Network. For medium networks, we recommend that this is at least a /21 so that you can create 9 additional subnets."
+      }
+    },
+    "environmentA": {
+      "type": "string",
+      "allowedValues": [
+        "Production",
+        "Staging",
+        "Test",
+        "Development",
+        "Q/A",
+        "Other"
+      ],
+      "metadata": {
+        "description": "The Environment type we are building"
+      },
+      "defaultValue": "Production"
+    },
+    "subnetDMZCIDRA": {
+      "type": "string",
+      "defaultValue": "10.0.1.0/24",
+      "metadata": {
+        "description": "The IP Address Space of the DMZ Subnet. (Typically reserved for Web Servers)"
+      }
+    },    
+    "buildDate": {
+      "type": "string",
+      "metadata": {
+        "description": "The date of this build"
+      },
+      "defaultValue": "01/01/2999"
+    },
+    "buildBy": {
+      "type": "string",
+      "metadata": {
+        "description": "The name of the person who build this environment"
+      },
+      "defaultValue": "First Last"
+    }
+  },
+  "variables": {
+    "resourceGroupLocation": "[resourceGroup().location]",
+    "environmentLabel": {
+      "Production": "PRD",
+      "Staging": "STG",
+      "Test": "TST",
+      "Development": "DEV",
+      "Q/A": "QA",
+      "Other": "OTR"
+    },
+    "resourceGroupLocationName": {
+      "eastasia": "EAS",
+      "southeastasia": "SEA",
+      "centralus": "CUS",
+      "eastus": "EUS",
+      "eastus2": "EU2",
+      "westus": "WUS",
+      "westus2": "WU2",
+      "westcentralus": "WCU",
+      "northcentralus": "NCU",
+      "southcentralus": "SCU",
+      "northeurope": "NEU",
+      "westeurope": "WEU",
+      "japanwest": "JPW",
+      "japaneast": "JPE",
+      "brazilsouth": "BZS",
+      "australiaeast": "AEA",
+      "australiasoutheast": "ASE",
+      "southindia": "SID",
+      "centralindia": "CID",
+      "westindia": "WID",
+      "canadacentral": "CAC",
+      "canadaeast": "CAE",
+      "ukwest": "UKW",
+      "uksouth": "UKS",
+      "chinaeast": "CEA",
+      "chinanorth": "CNO",
+      "germanycentral": "GEC",
+      "germanynorteast": "GNE"
+    },
+    "virtualNetworkName": "[concat(variables('resourceGroupLocationName')[variables('resourceGroupLocation')],'-', parameters('vnetName'))]",
+    "subnetDMZNameA": "[concat(variables('virtualNetworkName'), '-DMZ-SUBNET')]",
+    "networkSecurityGroupDMZNameA": "[concat(variables('subnetDMZNameA'), '-NSG')]"
+  },
+  "resources": [
+    {
+      "apiVersion": "2015-05-01-preview",
+      "type": "Microsoft.Network/networkSecurityGroups",
+      "name": "[variables('networkSecurityGroupDMZNameA')]",
+      "location": "[resourceGroup().location]",
+      "tags": {
+        "displayName": "NSG-DMZ",
+        "Environment": "[parameters('environmentA')]",
+        "BuildDate": "[parameters('buildDate')]",
+        "BuildBy": "[parameters('buildBy')]"
+      },
+      "properties": {
+        "securityRules": [
+          {
+            "name": "Allow_ALL_INBOUND_RDP",
+            "properties": {
+              "description": "Allows All Inbound RDP",
+              "protocol": "Tcp",
+              "sourcePortRange": "*",
+              "destinationPortRange": "3389",
+              "sourceAddressPrefix": "*",
+              "destinationAddressPrefix": "*",
+              "access": "Allow",
+              "priority": 100,
+              "direction": "Inbound"
+            }
+          },
+          {
+            "name": "Deny_ALL_INBOUND_UDP",
+            "properties": {
+              "description": "Deny all inbound UDP",
+              "protocol": "Udp",
+              "sourcePortRange": "*",
+              "destinationPortRange": "*",
+              "sourceAddressPrefix": "*",
+              "destinationAddressPrefix": "*",
+              "access": "Deny",
+              "priority": 4000,
+              "direction": "Inbound"
+            }
+          },
+          {
+            "name": "Deny_ALL_INBOUND_TCP",
+            "properties": {
+              "description": "Deny all inbound TCP",
+              "protocol": "Tcp",
+              "sourcePortRange": "*",
+              "destinationPortRange": "*",
+              "sourceAddressPrefix": "*",
+              "destinationAddressPrefix": "*",
+              "access": "Deny",
+              "priority": 4001,
+              "direction": "Inbound"
+            }
+          }
+        ]
+      }
+    },
+    {
+      "name": "[variables('virtualNetworkName')]",
+      "type": "Microsoft.Network/virtualNetworks",
+      "location": "[resourceGroup().location]",
+      "tags": {
+        "displayName": "VirtualNetwork",
+        "Environment": "[parameters('environmentA')]",
+        "BuildDate": "[parameters('buildDate')]",
+        "BuildBy": "[parameters('buildBy')]"
+      },
+      "apiVersion": "2015-06-15",
+      "dependsOn": [
+        "[resourceId('Microsoft.Network/networkSecurityGroups',variables('networkSecurityGroupDMZNameA'))]"
+      ],
+      "properties": {
+        "addressSpace": {
+          "addressPrefixes": [
+            "[parameters('vnetCIDR')]"
+          ]
+        },
+        "subnets": [
+          {
+            "name": "[variables('subnetDMZNameA')]",
+            "properties": {
+              "addressPrefix": "[parameters('subnetDMZCIDRA')]",
+              "networkSecurityGroup": {
+                "id": "[resourceId('Microsoft.Network/networkSecurityGroups', variables('networkSecurityGroupDMZNameA'))]"
+              }
+            }
+          }
+        ]
+      }
+    }
+  ],
+  "outputs": {
+    "vnetRG": {
+      "type": "string",
+      "value": "[resourceGroup().name]"
+    },
+    "vnetName": {
+      "type": "string",
+      "value": "[Variables('virtualNetworkName')]"
+    },
+    "subnetDMZNameA": {
+      "type": "string",
+      "value": "[variables('subnetDMZNameA')]"
+    }
+  }
+}

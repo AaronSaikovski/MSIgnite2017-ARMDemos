@@ -1,0 +1,104 @@
+﻿{
+  "$schema": "http://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
+  "contentVersion": "1.0.0.0",
+  "parameters": {
+    "storageAccountType": {
+      "allowedValues": [
+        "Standard_LRS",
+        "Standard_GRS",
+        "Standard_RAGRS",
+        "Standard_ZRS",
+        "Premium_LRS"
+      ],
+      "defaultValue": "Standard_LRS",
+      "metadata": {
+        "description": "The type of the Storage Account created"
+      },
+      "type": "string"
+    },
+    "storageAccountCount": {
+      "type": "int",
+      "minValue": 1,
+      "maxValue": 1,
+      "defaultValue": 1,
+      "metadata": {
+        "description": "Number of storage accounts to be created"
+      }
+    },
+    "storageAccountSuffix": {
+      "type": "string",
+      "minLength": 3,
+      "maxLength": 13,
+      "metadata": {
+        "description": "The suffix name to use for this storage account"
+      },
+      "defaultValue": "Other"
+    },
+    "environment": {
+      "type": "string",
+      "allowedValues": [
+        "Production",
+        "Staging",
+        "Test",
+        "Development",
+        "Q/A",
+        "Bastion",
+        "Other"
+      ],
+      "metadata": {
+        "description": "The Environment type we are building"
+      },
+      "defaultValue": "Production"
+    },
+    "buildDate": {
+      "type": "string",
+
+      "metadata": {
+        "description": "The date of this build"
+      },
+      "defaultValue": "01/01/2999"
+    },
+    "buildBy": {
+      "type": "string",
+      "metadata": {
+        "description": "The name of the person who built this environment"
+      },
+      "defaultValue": "First Last"
+    }
+  },
+  "variables": {   
+  },
+  "resources": [
+    {
+      "type": "Microsoft.Storage/storageAccounts",
+      "name": "[concat(substring(uniqueString(subscription().id, resourceGroup().id, string(copyIndex(1))) ,0,10), tolower(parameters('storageAccountSuffix')), copyIndex(1))]",
+      "apiVersion": "2016-01-01",
+      "location": "[resourceGroup().location]",
+      "copy": {
+        "name": "storageLoop",
+        "count": "[parameters('storageAccountCount')]"
+      },
+      "sku": {
+        "name": "[parameters('storageAccountType')]"
+      },
+      "kind": "Storage",
+      "tags": {
+        "displayName": "StorageAccount",
+        "Environment": "[parameters('environment')]",
+        "BuildDate": "[parameters('buildDate')]",
+        "BuildBy": "[parameters('buildBy')]"
+      },
+      "properties": {
+      }
+    }
+  ],
+  "outputs": {
+   "StorageAccounts": {
+    "type": "array",
+     "value" :   [
+           "[concat(substring(uniqueString( subscription().id, resourceGroup().id, '1') ,0,10), tolower(parameters('storageAccountSuffix')), '1' )]"        
+     ]
+   }
+  }
+}
+

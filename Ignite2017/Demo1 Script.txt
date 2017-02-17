@@ -1,0 +1,25 @@
+Show “Hello World” ARM template in Visual Studio
+Walk through file structure
+Show String concatenation
+Show outputs
+
+Show “Hello World” ARM template parameter file in Visual Studio
+Highlight parameters
+
+Right click on Visual Studio Project and click deploy
+Choose ‘Azure Pass’ subscription
+Create New resource group – “Demo1”
+Location: ‘Australia Southeast’
+Click Create
+
+Choose:
+‘demo1\helloworld-azuredeploy.json’ as deployment template
+‘demo1\helloworld-azuredeploy-parameters.json’ as parameters file
+
+Click ‘OK’
+
+Show Visual Studio output window
+
+Show output params in Zoomit
+
+Show that no resources have been deployed into Demo1 Resource group

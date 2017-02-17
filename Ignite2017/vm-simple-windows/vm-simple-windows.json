@@ -1,0 +1,323 @@
+{
+  "$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
+  "contentVersion": "1.0.0.0",
+  "parameters": {
+
+    "vmName": {
+      "metadata": {
+        "description": "The computer name to Deploy"
+      },
+      "type": "string",
+      "minLength": 3,
+      "maxLength": 14,
+      "defaultValue": "WIN-IIS-01"
+    },
+
+    "adminUsername": {
+      "type": "string",
+      "metadata": {
+        "description": "Username for the Virtual Machine."
+      }
+    },
+    "adminPassword": {
+      "type": "securestring",
+      "metadata": {
+        "description": "Password for the Virtual Machine."
+      }
+    },
+    "dnsLabelPrefix": {
+      "defaultValue": "mustbeunique",
+      "maxLength": 50,
+      "metadata": {
+        "description": "DNS Label for the Public IP. Must be lowercase. It should match with the following regular expression: ^[a-z][a-z0-9-]{1,61}[a-z0-9]$ or it will raise an error."
+      },
+      "type": "string"
+    },
+    "existingStorageAccount": {
+      "type": "string",
+      "maxLength": 24,
+      "metadata": {
+        "description": "The name of the existing storage account to use (must be on same resource group as this deployment)"
+      }
+    },
+
+    "subnetName": {
+      "type": "string",
+      "defaultValue": "LOC-VNET01-DMZ-ENV",
+      "minLength": 1,
+      "metadata": {
+        "description": "Name of the Subnet inside of the provided VNET where you want to deploy this Virtual Machine."
+      }
+    },
+    "vnetName": {
+      "type": "string",
+      "defaultValue": "LOC-VNET01",
+      "minLength": 1,
+      "metadata": {
+        "description": "Name of an existing Virtual Network"
+      }
+    },
+
+    "addressPrefix": {
+      "type": "string",
+      "defaultValue": "10.0.0.1/16",
+      "minLength": 1,
+      "metadata": {
+        "description": "VNet Address Prefix"
+      }
+    },
+    "subnetPrefix": {
+      "type": "string",
+      "defaultValue": "10.0.1.0/24",
+      "minLength": 1,
+      "metadata": {
+        "description": "VNet subnet Address Prefix"
+      }
+    },
+    "publicIPAddressName": {
+      "type": "string",
+      "defaultValue": "MyPublicIP",
+      "minLength": 1,
+      "metadata": {
+        "description": "PublicIP name"
+      }
+    },
+    "vmNICName": {
+      "type": "string",
+      "defaultValue": "MyVMNic",
+      "minLength": 1,
+      "metadata": {
+        "description": "VM NIC Name"
+      }
+    },
+    "windowsOSVersion": {
+      "type": "string",
+      "defaultValue": "2012-R2-Datacenter",
+      "allowedValues": [
+        "2008-R2-SP1",
+        "2012-Datacenter",
+        "2012-R2-Datacenter",
+        "2016-Nano-Server",
+        "2016-Datacenter-with-Containers",
+        "2016-Datacenter"
+      ],
+      "metadata": {
+        "description": "The Windows version for the VM. This will pick a fully patched image of this given Windows version."
+      }
+    },
+    "vmSize": {
+      "type": "string",
+      "minLength": 1,
+      "defaultValue": "Standard_A2",
+      "allowedValues": [
+        "Basic_A0",
+        "Basic_A1",
+        "Basic_A2",
+        "Basic_A3",
+        "Basic_A4",
+        "Standard_A0",
+        "Standard_A1",
+        "Standard_A2",
+        "Standard_A3",
+        "Standard_A4",
+        "Standard_A5",
+        "Standard_A6",
+        "Standard_A7",
+        "Standard_A8",
+        "Standard_A9",
+        "Standard_A10",
+        "Standard_A11",
+        "Standard_D1",
+        "Standard_D2",
+        "Standard_D3",
+        "Standard_D4",
+        "Standard_D11",
+        "Standard_D12",
+        "Standard_D13",
+        "Standard_D14",
+        "Standard_D1_v2",
+        "Standard_D2_v2",
+        "Standard_D3_v2",
+        "Standard_D4_v2",
+        "Standard_D5_v2",
+        "Standard_D11_v2",
+        "Standard_D12_v2",
+        "Standard_D13_v2",
+        "Standard_D14_v2",
+        "Standard_D15_v2",
+        "Standard_DS1",
+        "Standard_DS2",
+        "Standard_DS3",
+        "Standard_DS4",
+        "Standard_DS11",
+        "Standard_DS12",
+        "Standard_DS13",
+        "Standard_DS14",
+        "Standard_DS1_v2",
+        "Standard_DS2_v2",
+        "Standard_DS3_v2",
+        "Standard_DS4_v2",
+        "Standard_DS5_v2",
+        "Standard_DS11_v2",
+        "Standard_DS12_v2",
+        "Standard_DS13_v2",
+        "Standard_DS14_v2",
+        "Standard_DS15_v2",
+        "Standard_F1S",
+        "Standard_F2S",
+        "Standard_F4S",
+        "Standard_F8S",
+        "Standard_F16S"
+      ],
+      "metadata": {
+        "description": "Size of the virtual machine, must be available in the virtual machine's location. For more information visit https://azure.microsoft.com/en-us/documentation/articles/virtual-machines-windows-sizes/#a-series"
+      }
+    }
+
+  },
+  "variables": {
+    "nicName": "[parameters('vmNICName')]",
+    "subnetName": "[parameters('subnetName')]",
+    "publicIPAddressName": "[parameters('publicIPAddressName')]",
+    "vmName": "[parameters('vmName')]",
+    "subnetRef": "[resourceId('Microsoft.Network/virtualNetworks/subnets', parameters('vnetName'), parameters('subnetName'))]"
+  },
+  "resources": [
+    {
+      "type": "Microsoft.Storage/storageAccounts",
+      "name": "[parameters('existingStorageAccount')]",
+      "apiVersion": "2016-01-01",
+      "location": "[resourceGroup().location]",
+      "sku": {
+        "name": "Standard_LRS"
+      },
+      "kind": "Storage",
+      "properties": {}
+    },
+    {
+      "apiVersion": "2016-03-30",
+      "type": "Microsoft.Network/publicIPAddresses",
+      "name": "[variables('publicIPAddressName')]",
+      "location": "[resourceGroup().location]",
+      "properties": {
+        "publicIPAllocationMethod": "Dynamic",
+        "dnsSettings": {
+          "domainNameLabel": "[parameters('dnsLabelPrefix')]"
+        }
+      }
+    },
+    {
+      "apiVersion": "2016-03-30",
+      "type": "Microsoft.Network/virtualNetworks",
+      "name": "[parameters('vnetName')]",
+      "location": "[resourceGroup().location]",
+      "properties": {
+        "addressSpace": {
+          "addressPrefixes": [
+            "[parameters('addressPrefix')]"
+          ]
+        },
+        "subnets": [
+          {
+            "name": "[variables('subnetName')]",
+            "properties": {
+              "addressPrefix": "[parameters('subnetPrefix')]"
+            }
+          }
+        ]
+      }
+    },
+    {
+      "apiVersion": "2016-03-30",
+      "type": "Microsoft.Network/networkInterfaces",
+      "name": "[variables('nicName')]",
+      "location": "[resourceGroup().location]",
+      "dependsOn": [
+        "[resourceId('Microsoft.Network/publicIPAddresses/', variables('publicIPAddressName'))]",
+        "[resourceId('Microsoft.Network/virtualNetworks/', parameters('vnetName'))]"
+      ],
+      "properties": {
+        "ipConfigurations": [
+          {
+            "name": "ipconfig1",
+            "properties": {
+              "privateIPAllocationMethod": "Dynamic",
+              "publicIPAddress": {
+                "id": "[resourceId('Microsoft.Network/publicIPAddresses',variables('publicIPAddressName'))]"
+              },
+              "subnet": {
+                "id": "[variables('subnetRef')]"
+              }
+            }
+          }
+        ]
+      }
+    },
+    {
+      "apiVersion": "2015-06-15",
+      "type": "Microsoft.Compute/virtualMachines",
+      "name": "[variables('vmName')]",
+      "location": "[resourceGroup().location]",
+      "dependsOn": [
+        "[resourceId('Microsoft.Storage/storageAccounts/', parameters('existingStorageAccount'))]",
+        "[resourceId('Microsoft.Network/networkInterfaces/', parameters('vmNICName'))]"
+      ],
+      "properties": {
+        "hardwareProfile": {
+          "vmSize": "[parameters('vmSize')]"
+        },
+        "osProfile": {
+          "computerName": "[variables('vmName')]",
+          "adminUsername": "[parameters('adminUsername')]",
+          "adminPassword": "[parameters('adminPassword')]"
+        },
+        "storageProfile": {
+          "imageReference": {
+            "publisher": "MicrosoftWindowsServer",
+            "offer": "WindowsServer",
+            "sku": "[parameters('windowsOSVersion')]",
+            "version": "latest"
+          },
+          "osDisk": {
+            "name": "osdisk",
+            "vhd": {
+              "uri": "[concat(reference(resourceId('Microsoft.Storage/storageAccounts/', parameters('existingStorageAccount'))).primaryEndpoints.blob, 'vhds/osdisk.vhd')]"
+            },
+            "caching": "ReadWrite",
+            "createOption": "FromImage"
+          },
+          "dataDisks": [
+            {
+              "name": "datadisk1",
+              "diskSizeGB": "100",
+              "lun": 0,
+              "vhd": {
+                "uri": "[concat(reference(resourceId('Microsoft.Storage/storageAccounts/', parameters('existingStorageAccount'))).primaryEndpoints.blob, 'vhds/datadisk1.vhd')]"
+              },
+              "createOption": "Empty"
+            }
+          ]
+        },
+        "networkProfile": {
+          "networkInterfaces": [
+            {
+              "id": "[resourceId('Microsoft.Network/networkInterfaces',variables('nicName'))]"
+            }
+          ]
+        },
+        "diagnosticsProfile": {
+          "bootDiagnostics": {
+            "enabled": "true",
+            "storageUri": "[reference(resourceId('Microsoft.Storage/storageAccounts/', parameters('existingStorageAccount'))).primaryEndpoints.blob]"
+          }
+        }
+      }
+    }
+  ],
+  "outputs": {
+    "hostname": {
+      "type": "string",
+      "value": "[reference(parameters('publicIPAddressName')).dnsSettings.fqdn]"
+    }
+  }
+}

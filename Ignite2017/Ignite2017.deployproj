@@ -1,0 +1,52 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup Label="ProjectConfigurations">
+    <ProjectConfiguration Include="Debug|AnyCPU">
+      <Configuration>Debug</Configuration>
+      <Platform>AnyCPU</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Release|AnyCPU">
+      <Configuration>Release</Configuration>
+      <Platform>AnyCPU</Platform>
+    </ProjectConfiguration>
+  </ItemGroup>
+  <PropertyGroup Label="Globals">
+    <ProjectGuid>5d1dab60-1f5d-49bc-9fde-26c0063327d6</ProjectGuid>
+  </PropertyGroup>
+  <PropertyGroup>
+    <TargetFrameworkIdentifier>Deployment</TargetFrameworkIdentifier>
+    <TargetFrameworkVersion>1.0</TargetFrameworkVersion>
+    <PrepareForBuildDependsOn>
+    </PrepareForBuildDependsOn>
+  </PropertyGroup>
+  <Import Condition=" Exists('Deployment.targets') " Project="Deployment.targets" />
+  <Import Project="$(MSBuildToolsPath)\Microsoft.Common.targets" />
+  <!-- vertag<:>start tokens<:>maj.min -->
+  <Import Condition=" Exists('$(MSBuildExtensionsPath)\Microsoft\VisualStudio\v$(VisualStudioVersion)\Deployment\1.1\DeploymentProject.targets') " Project="$(MSBuildExtensionsPath)\Microsoft\VisualStudio\v$(VisualStudioVersion)\Deployment\1.1\DeploymentProject.targets" />
+  <!-- vertag<:>end -->
+  <ItemGroup>
+    <None Include="Demo1\helloworld-azuredeploy.json" />
+    <None Include="Demo1\helloworld-azuredeploy.parameters.json" />
+    <None Include="Demo1 Script.txt" />
+    <None Include="Demo2 Script.txt" />
+    <None Include="Deployment.targets">
+      <Visible>False</Visible>
+    </None>
+    <Content Include="Deploy-AzureResourceGroup.ps1" />
+    <None Include="key-vault\add-secret.json" />
+    <None Include="key-vault\add-secret.parameters.json" />
+    <None Include="key-vault\key-vault.json" />
+    <None Include="key-vault\key-vault.parameters.json" />
+    <None Include="network-small\network-small.json" />
+    <None Include="network-small\network-small.parameters.json" />
+    <None Include="scripts\AzureHelper.psm1" />
+    <None Include="scripts\cleanup.ps1" />
+    <None Include="scripts\setup.ps1" />
+    <None Include="scripts\switch-subs.ps1" />
+    <None Include="storage-account\storageaccount.json" />
+    <None Include="storage-account\storageaccount.parameters.json" />
+    <None Include="vm-simple-windows\vm-simple-windows.json" />
+    <None Include="vm-simple-windows\vm-simple-windows.parameters.json" />
+  </ItemGroup>
+  <Target Name="GetReferenceAssemblyPaths" />
+</Project>

@@ -1,0 +1,57 @@
+---------------------------------------------------------------------------------
+Powershell Base script (5mins)
+Open up \scripts\setup.ps1 in visual studio
+Show the code and explain the Resource group creatio process and Tagging
+Show the -TemplateParameterObject param for creating the storage account
+
+Open Powershell ISE
+cd "C:\MSIgnite\Demos\Ignite2017\scripts"
+
+run the script (./setup.ps1) in PowerShell ISE
+choose "Azure Pass" subscription
+View output and show audience with ZoomIt
+Load Azure Portal and show audience deployed resources
+Also show resource group Tags
+
+---------------------------------------------------------------------------------
+
+KeyVault(1min)
+Right click visual studio and deploy keyvault (key-vault.json & key-vault.parameters.json) into new resource group
+Right click visual studio and deploy keyvault (add-secret.json & add-secret.parameters.json) into new resource group
+Go to Azure Portal and show audience deployed Keyvault and keyvault secrets 
+
+---------------------------------------------------------------------------------
+
+Virtual Network(2mins)
+Right click visual studio and deploy virtual network (network-small.json & network-small.parameters.json) into new resource group
+Check params
+check validate only to show validation process
+Repeat steps but deploy this time
+Click Ok once happy
+show Azure portal deploying and switch back to visual studio
+Show outputs window with ZoomIt
+
+Open network-small.json and show audience internals of what has been deployed
+
+---------------------------------------------------------------------------------
+
+Virtual Machine(10mins)
+**Make sure to copy the storage account from the Azure Portal before proceeding**
+Right click visual studio and deploy Virtual Machine (vm-simple-windows.json & vm-simple-windows.parameters.json) into Demo2 resource group
+Check params - copy storage account name created during Powershell provisioning into param 'existingStorageAccount' - make sure there is NO whitespace
+
+Leave the other params alone - Make sure the VMSize is 'Standard_A0' - Standard A0 (1 core, 0.75 GB memory)
+Click Ok
+This can take some time (6 mins) - Go to Azure portal and refresh the Resource Group view
+Click on 'dev-vm-001' and show instance size
+
+Right click visual studio and deploy Virtual Machine (vm-simple-windows.json & vm-simple-windows.parameters.json) into Demo2 resource group
+click on edit parameters
+
+Change VM Size - (5mins)
+Change VMSize to 'Standard_A2'. Click Ok
+go back to resource group view and click refresh
+Click on 'dev-vm-001' and show instance size to show new instance size - should be now 'Standard A2 (2 cores, 3.5 GB memory)'
+
+---------------------------------------------------------------------------------
+

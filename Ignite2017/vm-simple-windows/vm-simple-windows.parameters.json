@@ -1,0 +1,46 @@
+{
+  "$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentParameters.json#",
+  "contentVersion": "1.0.0.0",
+  "parameters": {
+    "vmName": {
+      "value": "dev-vm-001"
+    },
+    "adminUsername": {
+      "value": "devadmin"
+    },
+    "adminPassword": {
+      "reference": {
+          "keyVault": {
+              "id": "/subscriptions/e5800eba-c5e2-41da-92e0-cf3832eb03e3/resourceGroups/Demo2Precanned/providers/Microsoft.KeyVault/vaults/Demo2Prebuilt-KeyVault"
+          },
+          "secretName": "devadmin"
+      }
+    },
+      "dnsLabelPrefix": {
+        "value": "dev-vm-001"
+      },
+    "existingStorageAccount": {
+      "value": "jwr35hfgzvign1"
+    },
+    "subnetName": {
+      "value": "ASE-VNET01-DMZ-SUBNET-NSG"
+    },
+    "vnetName": {
+      "value": "ASE-VNET01"
+    },
+      "publicIPAddressName": {
+        "value": "devpublicip"
+      },
+      "vmNICName": {
+        "value": "devvmnic"
+      },
+      "windowsOSVersion": {
+        "value": "2012-R2-Datacenter"
+      },
+      "vmSize": {
+        "value": "Standard_A1"
+      }
+
+
+    }
+  }

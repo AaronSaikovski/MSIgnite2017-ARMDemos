@@ -1,0 +1,23 @@
+﻿{
+    "$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
+    "contentVersion": "1.0.0.0",
+  "parameters": {
+    "testarmuser": {
+      "type": "string",
+      "metadata": {
+        "description": "A test output user"
+      }
+    }
+  },
+  "variables": {    
+    "welcomeMessage": "[concat('Hello - ', parameters('testarmuser'))]"
+  },
+  "resources": [
+  ],
+  "outputs": {
+    "someoutput": {
+      "type": "string",
+      "value": "[variables('welcomeMessage')]"
+    }
+  }
+}
